@@ -1,0 +1,170 @@
+<p-dialog
+  [(visible)]="visible"
+  [header]="isNew() ? 'New Pokémon' : 'Edit Pokémon'"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{ width: '40rem' }"
+  [breakpoints]="{ '767px': '95vw' }"
+  (onHide)="closed.emit()"
+>
+  <form class="fields" [formGroup]="form">
+    <div class="field full">
+      <label for="pokemon-name">Name</label>
+      <input
+        pInputText
+        id="pokemon-name"
+        formControlName="name"
+        autocomplete="off"
+        [fluid]="true"
+        [invalid]="!!errorFor('name')"
+      />
+      @if (errorFor('name'); as message) {
+        <p-message severity="error" variant="simple" size="small">{{ message }}</p-message>
+      }
+    </div>
+
+    <div class="field full" role="group" aria-labelledby="pokemon-image-label">
+      <span id="pokemon-image-label" class="label">Image</span>
+      <div class="image-field">
+        <div class="image-preview">
+          <app-pokemon-image [imageUrl]="imageUrl()" alt="Image preview" [size]="96" />
+        </div>
+        <div #imageControls class="image-controls">
+          <div class="buttons">
+            <p-fileupload
+              #uploader
+              mode="basic"
+              [auto]="true"
+              [customUpload]="true"
+              accept="image/png,image/jpeg,image/gif,image/webp"
+              [maxFileSize]="maxImageBytes"
+              chooseIcon="pi pi-upload"
+              [chooseLabel]="imageUrl() ? 'Change image' : 'Upload image'"
+              [chooseButtonProps]="{ severity: 'secondary', outlined: true, size: 'small' }"
+              (onSelect)="onImageSelect($event, uploader)"
+            />
+            @if (imageUrl()) {
+              <p-button
+                label="Remove image"
+                icon="pi pi-times"
+                severity="secondary"
+                variant="text"
+                size="small"
+                (onClick)="removeImage()"
+              />
+            }
+          </div>
+          @if (imageError(); as message) {
+            <p-message severity="error" variant="simple" size="small">{{ message }}</p-message>
+          } @else {
+            <!-- Not a p-message: that has role="alert" and would be read out whenever the dialog opens. -->
+            <small class="hint">PNG, JPEG, GIF or WebP, up to 1 MB.</small>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="field full">
+      <label for="pokemon-types">Types</label>
+      <p-multiselect
+        inputId="pokemon-types"
+        formControlName="types"
+        [options]="types"
+        placeholder="Choose one or two types"
+        display="chip"
+        [filter]="false"
+        [showToggleAll]="false"
+        [showHeader]="false"
+        [selectionLimit]="maxTypes"
+        [fluid]="true"
+        appendTo="body"
+        [invalid]="!!errorFor('types')"
+      />
+      @if (errorFor('types'); as message) {
+        <p-message severity="error" variant="simple" size="small">{{ message }}</p-message>
+      }
+    </div>
+
+    <div class="field">
+      <label for="pokemon-level">Level</label>
+      <p-inputnumber
+        inputId="pokemon-level"
+        formControlName="level"
+        [min]="minLevel"
+        [max]="maxLevel"
+        [maxFractionDigits]="0"
+        [useGrouping]="false"
+        [showButtons]="true"
+        [fluid]="true"
+        [invalid]="!!errorFor('level')"
+      />
+      @if (errorFor('level'); as message) {
+        <p-message severity="error" variant="simple" size="small">{{ message }}</p-message>
+      }
+    </div>
+
+    <div class="field">
+      <label for="pokemon-captured-at">Capture date</label>
+      <p-datepicker
+        inputId="pokemon-captured-at"
+        formControlName="capturedAt"
+        dateFormat="dd/mm/yy"
+        [maxDate]="today"
+        [showIcon]="true"
+        iconDisplay="input"
+        [fluid]="true"
+        appendTo="body"
+        [invalid]="!!errorFor('capturedAt')"
+      />
+      @if (errorFor('capturedAt'); as message) {
+        <p-message severity="error" variant="simple" size="small">{{ message }}</p-message>
+      }
+    </div>
+
+    <div class="field full inline">
+      <p-toggleswitch inputId="pokemon-favorite" formControlName="favorite" />
+      <label for="pokemon-favorite">Favorite</label>
+    </div>
+
+    <div class="field full">
+      <label for="pokemon-moves">Moves</label>
+      <!--
+        No closing animation on the suggestions: PrimeNG closes them again when that animation ends,
+        so a move typed right after pressing Enter would get no suggestions, and Enter would add nothing.
+      -->
+      <p-autocomplete
+        inputId="pokemon-moves"
+        formControlName="moves"
+        [multiple]="true"
+        [suggestions]="moveSuggestions()"
+        (completeMethod)="searchMoves($event)"
+        [autoOptionFocus]="true"
+        [delay]="0"
+        [motionOptions]="{ leave: false }"
+        [fluid]="true"
+        appendTo="body"
+        [invalid]="!!errorFor('moves')"
+      >
+        <ng-template #item let-move>
+          <span class="move-option">
+            {{ move }}
+            @if (isNewMove(move)) {
+              <p-tag value="New" severity="info" />
+            }
+          </span>
+        </ng-template>
+      </p-autocomplete>
+      @if (errorFor('moves'); as message) {
+        <p-message severity="error" variant="simple" size="small">{{ message }}</p-message>
+      } @else {
+        <small class="hint">Type a move and press Enter, or pick a suggestion.</small>
+      }
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Cancel" severity="secondary" [text]="true" (onClick)="visible.set(false)" />
+    <p-button label="Save" icon="pi pi-check" (onClick)="save()" />
+  </ng-template>
+</p-dialog>

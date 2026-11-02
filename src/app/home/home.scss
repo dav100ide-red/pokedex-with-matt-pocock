@@ -1,0 +1,88 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.type-filter {
+  flex: 0 1 22rem;
+  min-width: 12rem;
+}
+
+.image-column {
+  width: 5rem;
+}
+
+.actions-column {
+  text-align: end;
+  white-space: nowrap;
+
+  .row {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+}
+
+.favorite {
+  color: var(--p-yellow-500);
+}
+
+.not-favorite {
+  color: var(--p-text-muted-color);
+}
+
+.cell-label {
+  display: none;
+  font-weight: 600;
+}
+
+// Desktop-first. On narrow screens each row becomes a stacked card with a label beside each value,
+// the same technique as PrimeNG's own "stack" layout (deprecated since v20). Only the sortable
+// headers stay, as a row of sort buttons.
+@media screen and (max-width: 767px) {
+  .header-row {
+    display: flex;
+    flex-wrap: wrap;
+
+    > th {
+      flex: 1 1 auto;
+    }
+
+    > th:not(.p-datatable-sortable-column) {
+      display: none;
+    }
+  }
+
+  .pokemon-row > td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    text-align: start;
+
+    &:not(:last-child) {
+      border: 0;
+    }
+  }
+
+  .cell-label {
+    display: block;
+  }
+}

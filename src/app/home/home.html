@@ -1,3 +1,133 @@
-@for (pokemon of pokemons(); track pokemon.id) {
-  <div>{{ pokemon | json }}</div>
+<div class="page">
+  <p-toolbar>
+    <ng-template #start>
+      <h1 class="title">Pokédex</h1>
+    </ng-template>
+    <ng-template #end>
+      <div class="row">
+        <p-button label="New Pokémon" icon="pi pi-plus" (onClick)="formTarget.set('new')" />
+        <app-theme-toggle />
+      </div>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    [value]="visiblePokemons()"
+    dataKey="id"
+    [paginator]="true"
+    [rows]="10"
+    [(first)]="first"
+    [rowHover]="true"
+  >
+    <ng-template #caption>
+      <div class="row">
+        <p-multiselect
+          class="type-filter"
+          [options]="types"
+          [ngModel]="selectedTypes()"
+          (ngModelChange)="selectedTypes.set($event ?? [])"
+          placeholder="Filter by type"
+          ariaLabel="Filter by type"
+          display="chip"
+          [filter]="false"
+          [showToggleAll]="false"
+          [showHeader]="false"
+          [showClear]="true"
+          appendTo="body"
+        />
+        <span id="type-match-label" class="visually-hidden">Match</span>
+        <p-selectbutton
+          [options]="matchModes"
+          [(ngModel)]="typeMatchMode"
+          optionLabel="label"
+          optionValue="value"
+          [allowEmpty]="false"
+          ariaLabelledBy="type-match-label"
+        />
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr class="header-row">
+        <th scope="col" class="image-column">Image</th>
+        <th scope="col" pSortableColumn="name">Name <p-sortIcon field="name" /></th>
+        <th scope="col">Types</th>
+        <th scope="col" pSortableColumn="level">Level <p-sortIcon field="level" /></th>
+        <th scope="col" pSortableColumn="capturedAt">
+          Capture date <p-sortIcon field="capturedAt" />
+        </th>
+        <th scope="col">Favorite</th>
+        <th scope="col" class="actions-column">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-pokemon>
+      <tr class="pokemon-row">
+        <td class="image-column">
+          <span class="cell-label">Image</span>
+          <app-pokemon-image [imageUrl]="pokemon.imageUrl" [alt]="pokemon.name" [preview]="true" />
+        </td>
+        <td><span class="cell-label">Name</span>{{ pokemon.name }}</td>
+        <td>
+          <span class="cell-label">Types</span>
+          <span class="row">
+            @for (type of pokemon.types; track type) {
+              <p-tag [value]="type" severity="secondary" />
+            }
+          </span>
+        </td>
+        <td><span class="cell-label">Level</span>{{ pokemon.level }}</td>
+        <td>
+          <span class="cell-label">Capture date</span>
+          {{ pokemon.capturedAt | date: 'dd/MM/yyyy' : 'UTC' }}
+        </td>
+        <td>
+          <span class="cell-label">Favorite</span>
+          @if (pokemon.favorite) {
+            <i class="pi pi-star-fill favorite" role="img" aria-label="Favorite"></i>
+          } @else {
+            <i class="pi pi-star not-favorite" role="img" aria-label="Not a favorite"></i>
+          }
+        </td>
+        <td class="actions-column">
+          <span class="cell-label">Actions</span>
+          <span class="row">
+            <p-button
+              icon="pi pi-pencil"
+              severity="secondary"
+              [text]="true"
+              [rounded]="true"
+              [ariaLabel]="'Edit ' + pokemon.name"
+              pTooltip="Edit"
+              tooltipPosition="top"
+              (onClick)="formTarget.set(pokemon)"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              [rounded]="true"
+              [ariaLabel]="'Delete ' + pokemon.name"
+              pTooltip="Delete"
+              tooltipPosition="top"
+              (onClick)="confirmDelete(pokemon)"
+            />
+          </span>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="7">No Pokémon found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+@if (formTarget(); as target) {
+  <app-pokemon-form-dialog
+    [pokemon]="target === 'new' ? null : target"
+    (closed)="formTarget.set(null)"
+  />
 }

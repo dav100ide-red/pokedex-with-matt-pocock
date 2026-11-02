@@ -1,1 +1,14 @@
 <router-outlet />
+
+<!-- App-wide: any page can show toasts and confirmations through MessageService and ConfirmationService. -->
+<!--
+  Top-center sits over the toolbar's empty middle; top-right would cover its buttons. On small screens
+  the toolbar is full width, so toasts move to the bottom instead.
+-->
+<p-toast
+  position="top-center"
+  [breakpoints]="{
+    '767px': { width: '100%', left: '0', right: '0', top: 'auto', bottom: '0', transform: 'none' },
+  }"
+/>
+<p-confirmdialog [style]="{ width: '28rem' }" [breakpoints]="{ '767px': '90vw' }" />
